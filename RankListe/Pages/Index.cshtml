@@ -1,0 +1,986 @@
+﻿@page
+@model IndexModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spil Rangliste</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+            :root {
+                --primary: #007bff;
+                --primary-dark: #004080;
+                --primary-light: #eaf3ff;
+                --background: #f8f9fa;
+                --surface: #ffffff;
+                --border: #dee2e6;
+                --text: #212529;
+                --muted: #6c757d;
+                --success: #198754;
+                --danger: #ff4d4d;
+                --radius: 4px;
+                --shadow: 0 2px 8px rgba(0, 64, 128, 0.08);
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+
+            body {
+                margin: 0;
+                padding: 0;
+                background: var(--background);
+                color: var(--text);
+                font-family: "Roboto", "Open Sans", sans-serif;
+                font-size: 15px;
+            }
+
+
+            .topbar {
+                background: var(--primary-dark);
+                color: white;
+                padding: 20px;
+            }
+
+            .topbar-inner {
+                max-width: 1200px;
+                margin: 0 auto;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 20px;
+            }
+
+            .topbar h1 {
+                margin: 0;
+                font-size: 26px;
+                font-weight: 700;
+            }
+
+            .topbar p {
+                margin: 4px 0 0;
+                color: #dcecff;
+                font-size: 14px;
+            }
+
+
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 24px 20px 40px;
+            }
+
+            .dashboard {
+                display: grid;
+                grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
+                gap: 20px;
+                align-items: start;
+            }
+
+            .main-column,
+            .side-column {
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+            }
+
+
+            .card {
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                box-shadow: var(--shadow);
+                overflow: hidden;
+            }
+
+            .card-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 15px;
+                padding: 18px 20px;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .card-title {
+                margin: 0;
+                color: var(--primary-dark);
+                font-size: 21px;
+                font-weight: 600;
+            }
+
+            .card-body {
+                padding: 20px;
+            }
+
+
+            .btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 7px;
+                min-height: 40px;
+                padding: 9px 14px;
+                border: 0;
+                border-radius: var(--radius);
+                background: var(--primary);
+                color: white;
+                font-family: inherit;
+                font-size: 14px;
+                font-weight: 700;
+                cursor: pointer;
+                transition: background-color 0.15s ease, transform 0.1s ease;
+            }
+
+                .btn:hover {
+                    background: #0069d9;
+                }
+
+                .btn:active {
+                    background: #0056b3;
+                    transform: translateY(1px);
+                }
+
+                .btn:disabled {
+                    opacity: 0.65;
+                    cursor: not-allowed;
+                }
+
+            .btn-secondary {
+                background: var(--primary-dark);
+            }
+
+                .btn-secondary:hover {
+                    background: #003566;
+                }
+
+            .btn-full {
+                width: 100%;
+            }
+
+            .btn-icon {
+                width: 40px;
+                padding: 9px;
+            }
+
+            .table-wrapper {
+                overflow-x: auto;
+            }
+
+            .ranking-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+                .ranking-table th,
+                .ranking-table td {
+                    padding: 13px 16px;
+                    text-align: left;
+                    border-bottom: 1px solid var(--border);
+                }
+
+                .ranking-table th {
+                    background: var(--background);
+                    color: var(--muted);
+                    font-size: 13px;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    letter-spacing: 0.03em;
+                }
+
+                .ranking-table tbody tr:nth-child(even) {
+                    background: #fafafa;
+                }
+
+                .ranking-table tbody tr:hover {
+                    background: var(--primary-light);
+                }
+
+                .ranking-table tbody tr:last-child td {
+                    border-bottom: 0;
+                }
+
+            .rank {
+                width: 70px;
+                color: var(--muted);
+                font-weight: 700;
+            }
+
+            .player-name {
+                font-weight: 600;
+            }
+
+            .points {
+                font-weight: 700;
+                color: var(--primary-dark);
+            }
+
+            .win-rate {
+                color: var(--success);
+                font-weight: 600;
+            }
+
+
+            .matches {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+            }
+
+            .match {
+                display: grid;
+                grid-template-columns: 115px 1fr auto 1fr;
+                align-items: center;
+                gap: 12px;
+                padding: 14px 20px;
+                border-bottom: 1px solid var(--border);
+            }
+
+                .match:last-child {
+                    border-bottom: 0;
+                }
+
+                .match:hover {
+                    background: #fafafa;
+                }
+
+            .match-time {
+                color: var(--muted);
+                font-size: 13px;
+            }
+
+            .match-player {
+                font-weight: 500;
+            }
+
+            .match-winner {
+                color: var(--primary-dark);
+                font-weight: 700;
+                text-align: right;
+            }
+
+            .match-loser {
+                color: var(--muted);
+            }
+
+            .match-score {
+                min-width: 55px;
+                text-align: center;
+                font-weight: 700;
+                color: var(--text);
+            }
+
+            .empty-state {
+                padding: 30px 20px;
+                text-align: center;
+                color: var(--muted);
+            }
+
+            .form-group {
+                margin-bottom: 16px;
+            }
+
+                .form-group:last-child {
+                    margin-bottom: 0;
+                }
+
+            label {
+                display: block;
+                margin-bottom: 6px;
+                color: var(--text);
+                font-size: 14px;
+                font-weight: 600;
+            }
+
+            input,
+            select {
+                width: 100%;
+                height: 42px;
+                padding: 9px 11px;
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                background: white;
+                color: var(--text);
+                font-family: inherit;
+                font-size: 15px;
+                outline: none;
+                transition: border-color 0.15s ease, box-shadow 0.15s ease;
+            }
+
+                input:focus,
+                select:focus {
+                    border-color: var(--primary);
+                    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.12);
+                }
+
+            .score-row {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+            }
+
+            .form-divider {
+                height: 1px;
+                margin: 20px 0;
+                background: var(--border);
+            }
+
+            .form-error {
+                display: none;
+                margin-top: 6px;
+                color: var(--danger);
+                font-size: 13px;
+            }
+
+                .form-error.visible {
+                    display: block;
+                }
+
+            .toast {
+                position: fixed;
+                right: 20px;
+                bottom: 20px;
+                z-index: 1000;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                max-width: 360px;
+                padding: 12px 16px;
+                border-radius: var(--radius);
+                background: var(--primary-dark);
+                color: white;
+                font-size: 14px;
+                font-weight: 500;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.18);
+                opacity: 0;
+                transform: translateY(10px);
+                pointer-events: none;
+                transition: opacity 0.2s ease, transform 0.2s ease;
+            }
+
+                .toast.show {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+
+                .toast.error {
+                    background: var(--danger);
+                }
+
+
+            .loading {
+                opacity: 0.6;
+                pointer-events: none;
+            }
+
+            .spinner {
+                display: inline-block;
+                width: 14px;
+                height: 14px;
+                border: 2px solid rgba(255,255,255,0.4);
+                border-top-color: white;
+                border-radius: 50%;
+                animation: spin 0.7s linear infinite;
+            }
+
+            @@Skeyframes spin {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+
+            @@media (max-width: 800px) {
+                .dashboard {
+                    grid-template-columns: 1fr;
+                }
+
+                .topbar-inner {
+                    align-items: flex-start;
+                }
+
+                .topbar h1 {
+                    font-size: 23px;
+                }
+            }
+
+            @@media (max-width: 600px) {
+                .container {
+                    padding: 15px 12px 30px;
+                }
+
+                .topbar {
+                    padding: 16px 12px;
+                }
+
+                .card-header {
+                    padding: 15px;
+                }
+
+                .card-body {
+                    padding: 15px;
+                }
+
+                .card-title {
+                    font-size: 19px;
+                }
+
+                .match {
+                    grid-template-columns: 1fr auto 1fr;
+                    gap: 8px;
+                    padding: 13px 15px;
+                }
+
+                .match-time {
+                    grid-column: 1 / -1;
+                    font-size: 12px;
+                }
+
+                .match-winner,
+                .match-loser {
+                    text-align: center;
+                }
+
+                .ranking-table th,
+                .ranking-table td {
+                    padding: 11px 10px;
+                }
+
+                    .ranking-table th:first-child,
+                    .ranking-table td:first-child {
+                        display: none;
+                    }
+            }
+    </style>
+</head>
+
+<body>
+
+    <header class="topbar">
+        <div class="topbar-inner">
+            <div>
+                <h1>Spil Rangliste</h1>
+                <p>Hold styr på spillere, points og seneste kampe</p>
+            </div>
+
+            <button id="opdaterBtn" class="btn btn-icon" onclick="hentDataFraServer(true)" title="Opdater">
+                ↻
+            </button>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <div class="dashboard">
+
+            <section class="main-column">
+
+                <div class="card">
+
+                    <div class="card-header">
+                        <h2 class="card-title">Rangliste</h2>
+
+                        <span id="sidstOpdateret"
+                              style="color: var(--muted); font-size: 13px;">
+                        </span>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table class="ranking-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Navn</th>
+                                    <th>Points</th>
+                                    <th>Win%</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="ranglisteBody">
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+                <div class="card">
+
+                    <div class="card-header">
+                        <h2 class="card-title">Seneste kampe</h2>
+                    </div>
+
+                    <ul id="kampeLista" class="matches">
+                    </ul>
+
+                </div>
+
+            </section>
+
+            <aside class="side-column">
+
+                <div class="card">
+
+                    <div class="card-header">
+                        <h2 class="card-title">Registrer kamp</h2>
+                    </div>
+
+                    <div class="card-body">
+
+                        <form id="kampForm" onsubmit="registrerKamp(event)">
+
+                            <div class="form-group">
+                                <label for="vinderNavn">Vinder</label>
+
+                                <select id="vinderNavn" required>
+                                    <option value="">Vælg spiller</option>
+                                </select>
+
+                                <div id="vinderError" class="form-error">
+                                    Vælg en vinder.
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="taberNavn">Taber</label>
+
+                                <select id="taberNavn" required>
+                                    <option value="">Vælg spiller</option>
+                                </select>
+
+                                <div id="taberError" class="form-error">
+                                    Vælg en taber.
+                                </div>
+                            </div>
+
+                            <div class="score-row">
+
+                                <div class="form-group">
+                                    <label for="vinderScore">Vinder score</label>
+
+                                    <input type="number"
+                                           id="vinderScore"
+                                           min="0"
+                                           value="11"
+                                           required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="taberScore">Taber score</label>
+
+                                    <input type="number"
+                                           id="taberScore"
+                                           min="0"
+                                           value="0"
+                                           required>
+                                </div>
+
+                            </div>
+
+                            <button type="submit" class="btn btn-full">
+                                ✓ Registrer kamp
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+                <div class="card">
+
+                    <div class="card-header">
+                        <h2 class="card-title">Tilføj deltager</h2>
+                    </div>
+
+                    <div class="card-body">
+
+                        <form id="deltagerForm" onsubmit="tilfoejDeltager(event)">
+
+                            <div class="form-group">
+                                <label for="nyDeltagerNavn">Navn</label>
+
+                                <input type="text"
+                                       id="nyDeltagerNavn"
+                                       placeholder="F.eks. Anders"
+                                       autocomplete="off"
+                                       required>
+
+                                <div id="deltagerError" class="form-error">
+                                    Indtast et navn.
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-full">
+                                + Tilføj deltager
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </aside>
+
+        </div>
+
+    </main>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+
+            let spillere = [];
+
+            function visToast(message, error = false) {
+                const toast = document.getElementById("toast");
+
+                toast.textContent = message;
+                toast.classList.toggle("error", error);
+                toast.classList.add("show");
+
+                setTimeout(() => {
+                    toast.classList.remove("show");
+                }, 2500);
+            }
+
+            function escapeHtml(value) {
+                const div = document.createElement("div");
+                div.textContent = value ?? "";
+                return div.innerHTML;
+            }
+
+            function opdaterSpillerDropdowns() {
+
+                const vinderSelect = document.getElementById("vinderNavn");
+                const taberSelect = document.getElementById("taberNavn");
+
+                const tidligereVinder = vinderSelect.value;
+                const tidligereTaber = taberSelect.value;
+
+                const options = spillere
+                    .map(spiller => {
+                        const navn = escapeHtml(spiller.navn);
+
+                        return `<option value="${navn}">${navn}</option>`;
+                    })
+                    .join("");
+
+                vinderSelect.innerHTML =
+                    '<option value="">Vælg spiller</option>' + options;
+
+                taberSelect.innerHTML =
+                    '<option value="">Vælg spiller</option>' + options;
+
+                if (spillere.some(s => s.navn === tidligereVinder)) {
+                    vinderSelect.value = tidligereVinder;
+                }
+
+                if (spillere.some(s => s.navn === tidligereTaber)) {
+                    taberSelect.value = tidligereTaber;
+                }
+            }
+
+            async function hentDataFraServer(visFeedback = false) {
+
+                const btn = document.getElementById("opdaterBtn");
+
+                try {
+
+                    btn.disabled = true;
+                    btn.innerHTML = '<span class="spinner"></span>';
+
+                    const response = await fetch("?handler=HentData");
+
+                    if (!response.ok) {
+                        throw new Error("Kunne ikke hente data.");
+                    }
+
+                    const data = await response.json();
+
+                    spillere = data.rangliste || [];
+
+
+                    const ranglisteBody =
+                        document.getElementById("ranglisteBody");
+
+                    ranglisteBody.innerHTML = "";
+
+                    if (spillere.length === 0) {
+
+                        ranglisteBody.innerHTML = `
+                            <tr>
+                                <td colspan="4" class="empty-state">
+                                    Ingen deltagere endnu.
+                                </td>
+                            </tr>
+                        `;
+
+                    } else {
+
+                        spillere.forEach((spiller, index) => {
+
+                            ranglisteBody.innerHTML += `
+                                <tr>
+                                    <td class="rank">#${index + 1}</td>
+
+                                    <td class="player-name">
+                                        ${escapeHtml(spiller.navn)}
+                                    </td>
+
+                                    <td class="points">
+                                        ${spiller.points} p
+                                    </td>
+
+                                    <td class="win-rate">
+                                        ${spiller.winPct}%
+                                    </td>
+                                </tr>
+                            `;
+
+                        });
+                    }
+
+                    opdaterSpillerDropdowns();
+
+
+                    const kampeLista =
+                        document.getElementById("kampeLista");
+
+                    kampeLista.innerHTML = "";
+
+                    const kampe = data.senesteKampe || [];
+
+                    if (kampe.length === 0) {
+
+                        kampeLista.innerHTML = `
+                            <li class="empty-state">
+                                Ingen kampe spillet endnu.
+                            </li>
+                        `;
+
+                    } else {
+
+                        kampe.forEach(kamp => {
+
+                            kampeLista.innerHTML += `
+                                <li class="match">
+
+                                    <span class="match-time">
+                                        ${escapeHtml(kamp.tidspunkt)}
+                                    </span>
+
+                                    <span class="match-player match-winner">
+                                        ${escapeHtml(kamp.vinder)}
+                                    </span>
+
+                                    <span class="match-score">
+                                        ${kamp.vinderScore}
+                                        -
+                                        ${kamp.taberScore}
+                                    </span>
+
+                                    <span class="match-player match-loser">
+                                        ${escapeHtml(kamp.taber)}
+                                    </span>
+
+                                </li>
+                            `;
+
+                        });
+                    }
+
+                    document.getElementById("sidstOpdateret").textContent =
+                        "Opdateret " +
+                        new Date().toLocaleTimeString("da-DK", {
+                            hour: "2-digit",
+                            minute: "2-digit"
+                        });
+
+                    if (visFeedback) {
+                        visToast("✓ Rangliste opdateret!");
+                    }
+
+                } catch (error) {
+
+                    console.error(error);
+
+                    visToast(
+                        "Kunne ikke hente data. Prøv igen.",
+                        true
+                    );
+
+                } finally {
+
+                    btn.disabled = false;
+                    btn.innerHTML = "↻";
+
+                }
+            }
+
+            async function tilfoejDeltager(event) {
+
+                event.preventDefault();
+
+                const input =
+                    document.getElementById("nyDeltagerNavn");
+
+                const error =
+                    document.getElementById("deltagerError");
+
+                const navn = input.value.trim();
+
+                if (!navn) {
+                    error.classList.add("visible");
+                    return;
+                }
+
+                error.classList.remove("visible");
+
+                try {
+
+                    const response = await fetch(
+                        "?handler=TilfoejDeltager",
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                navn: navn
+                            })
+                        }
+                    );
+
+                    if (!response.ok) {
+                        throw new Error("Kunne ikke oprette deltager.");
+                    }
+
+                    input.value = "";
+
+                    await hentDataFraServer();
+
+                    visToast(`✓ ${navn} er tilføjet!`);
+
+                } catch (error) {
+
+                    console.error(error);
+
+                    visToast(
+                        "Kunne ikke tilføje deltager.",
+                        true
+                    );
+                }
+            }
+
+            async function registrerKamp(event) {
+
+                event.preventDefault();
+
+                const vinder =
+                    document.getElementById("vinderNavn").value;
+
+                const taber =
+                    document.getElementById("taberNavn").value;
+
+                const vinderError =
+                    document.getElementById("vinderError");
+
+                const taberError =
+                    document.getElementById("taberError");
+
+                vinderError.classList.remove("visible");
+                taberError.classList.remove("visible");
+
+                let valid = true;
+
+                if (!vinder) {
+                    vinderError.classList.add("visible");
+                    valid = false;
+                }
+
+                if (!taber) {
+                    taberError.classList.add("visible");
+                    valid = false;
+                }
+
+                if (vinder && taber && vinder === taber) {
+                    visToast(
+                        "Vinder og taber skal være forskellige spillere.",
+                        true
+                    );
+                    valid = false;
+                }
+
+                if (!valid) {
+                    return;
+                }
+
+                const data = {
+
+                    vinder: vinder,
+
+                    vinderScore: parseInt(
+                        document.getElementById("vinderScore").value
+                    ),
+
+                    taber: taber,
+
+                    taberScore: parseInt(
+                        document.getElementById("taberScore").value
+                    )
+                };
+
+                try {
+
+                    const response = await fetch(
+                        "?handler=RegistrerKamp",
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify(data)
+                        }
+                    );
+
+                    if (!response.ok) {
+                        throw new Error("Kunne ikke registrere kampen.");
+                    }
+
+                    document.getElementById("kampForm").reset();
+
+                    document.getElementById("vinderScore").value = "11";
+                    document.getElementById("taberScore").value = "0";
+
+                    await hentDataFraServer();
+
+                    visToast("✓ Kampen er registreret!");
+
+                } catch (error) {
+
+                    console.error(error);
+
+                    visToast(
+                        "Kunne ikke registrere kampen.",
+                        true
+                    );
+                }
+            }
+
+            hentDataFraServer();
+
+            setInterval(() => hentDataFraServer(false), 60000);
+
+    </script>
+
+</body>
+</html>

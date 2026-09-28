@@ -1,0 +1,14 @@
+[
+  {
+    "Navn": "Lars",
+    "Points": 0,
+    "KampeVundet": 0,
+    "KampeTabt": 1
+  },
+  {
+    "Navn": "Sander",
+    "Points": 100000,
+    "KampeVundet": 1,
+    "KampeTabt": 0
+  }
+]
