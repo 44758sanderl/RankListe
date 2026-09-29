@@ -1,9 +1,17 @@
 [
   {
-    "Dato": "2026-09-28T09:21:46.4909392+02:00",
-    "Tidspunkt": "28-09-2026 09:21",
+    "Dato": "2026-09-29T09:12:47.3194563+02:00",
+    "Tidspunkt": "29-09-2026 09:12",
+    "Vinder": "Lars",
+    "VinderScore": 1000,
+    "TaberScore": 0,
+    "Taber": "Sander"
+  },
+  {
+    "Dato": "2026-09-29T09:12:36.2021036+02:00",
+    "Tidspunkt": "29-09-2026 09:12",
     "Vinder": "Sander",
-    "VinderScore": 100000,
+    "VinderScore": 1000,
     "TaberScore": 0,
     "Taber": "Lars"
   }
